@@ -1,4 +1,4 @@
-![](https://dl.dropboxusercontent.com/u/76275795/BlogPictures/20131219/logo1_med.png)
+![](http://chipmunk-physics.net/release/ChipmunkLatest-Docs/images/logo1_med.png)
 
 # Chipmunk2D中文手册
 
