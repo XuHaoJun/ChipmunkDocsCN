@@ -795,6 +795,29 @@ Chipmunk的`cpArbiter`结构封装了一对碰撞的形状和关于他们的所�
 
 ## 帮助函数 
 
+```
+void cpArbiterGetShapes(cpArbiter *arb, cpShape **a, cpShape **b)
+void cpArbiterGetBodies(const cpArbiter *arb, cpBody **a, cpBody **b)
+```
+得到在仲裁者关联的碰撞处理中所定义的形状（或者刚体）。如果你定义了一个处理函数如`cpSpaceAddCollisionHandler(space, 1, 2, …)`，你会发现`a->collision_type == 1`并且`b->collision_type == 2`。便捷的宏为你定义并且初始化了两个形状变量。默认的碰撞处理函数不会使用碰撞类型，所以顺序是未定义的。
+
+```
+#define CP_ARBITER_GET_SHAPES(arb, a, b) cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b)
+#define CP_ARBITER_GET_BODIES(arb, a, b) cpBody *a, *b; cpArbiterGetBodies(arb, &a, &b);
+```
+定义变量并且从仲裁者中检索形状/刚体所用的缩略宏。
+
+```
+cpVect cpArbiterTotalImpulseWithFriction(cpArbiter *arb);
+cpVect cpArbiterTotalImpulse(cpArbiter *arb);
+```
+返回为解决碰撞而施加于此步骤的冲量。这些函数应该只在`postStep()`或`cpBodyEachArbiter()`回调中被调用，否则结果将不可确定。如有疑问要不知道要使用哪个函数，使用`cpArbiterTotalImpulseWithFriction()`。
+
+```
+cpFloat cpArbiterTotalKE(const cpArbiter *arb);
+```
+计算在碰撞中的能量损失值包括静摩擦不包括动摩擦。这个函数应该在`postSolve()`, `postStep()`或者`cpBodyEachArbiter()`回调中被调用。
+
 # 查询
 
 Chipmunk空间支持4种空间查询包括最近点查询、线段查询、形状查询和快速包围盒查询。任何一种类型都可在空间里有效运行，并且点和线段查询可以针对单个形状来进行。所有类型的查询需要一个碰撞组和层，并使用和过滤形状间碰撞一样的规则来过滤出匹配。如果你不希望过滤掉任何匹配，使用`CP_ALL_LAYERS`作为层，`CP_NO_GROUP`作为组。
