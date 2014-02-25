@@ -820,10 +820,40 @@ typedef struct cpNearestPointQueryInfo {
 
 ## 线段查询
 
+线段查询就像射线投射一样，但由于并非所有的空间索引都允许处理无限长的射线查询所以它仅限于线段。在实践中这仍然非常快速，你不用过多的担心过长的线段查询会影响到性能。
+
+```
+typedef struct cpSegmentQueryInfo {
+	//碰撞的形状，如果没有碰撞发生则为NULL
+	cpShape *shape;
+	// 线段查询的归一化距离，在[0,1]范围内
+	cpFloat t;
+	// 表面命中点
+	cpVect n;
+} cpSegmentQueryInfo;
+
+```
+
 ## AABB查询
 
 ## 形状查询
 
+形状查询允许你检测空间中的形状是否和一个指定的区域发生了重叠。你可以通过这个来检测物物体是否已经在一个位置存在如果你想在该位置添加另外一个形状的话，又或者在AI中使用它进行感应查询。
+
+在查询前，你可以创建一个刚体对或者形状对，或者你创建一个shape值传为`NULL`的刚体，通过调用`cpShapeUpdate()`函数来设置形状的位置和旋转角度。
+
+```
+typedef void (*cpSpaceShapeQueryFunc)(cpShape *shape, cpContactPointSet *points, void *data);
+
+cpBool cpSpaceShapeQuery(cpSpace *space, cpShape *shape, cpSpaceShapeQueryFunc func, void *data);
+```
+
+关于上面代码：查询`space`来找到和`shape`重叠的形状。使用层和群组来过滤掉`shape`最后得到匹配。
+
 ## 闭包
 
+如果你的编译器支持闭包(如Clang), 还有另外一组函数可以调用，如`cpSpaceNearestPointQuery_b()`等。详情请参考`chipmunk.h`。
+
 ## 例子
+
+更多信息见[查询例子](http://chipmunk-physics.net/release/ChipmunkLatest-Docs/examples.html#Query)
