@@ -793,6 +793,30 @@ Chipmunk的`cpArbiter`结构封装了一对碰撞的形状和关于他们的所�
 
 ## 触点集
 
+通过触点集我们得到接触信息变得更为容易。
+
+```
+cpContactPointSet cpArbiterGetContactPointSet(const cpArbiter *arb)
+```
+从仲裁者中得到的触点集结构域。
+
+你可能通过下面的方式来得到并且处理一个触点集：
+
+```
+cpContactPointSet set = cpArbiterGetContactPointSet(arbiter);
+for(int i=0; i<set.count; i++){
+	// 得到并使用正常的触点集和穿透距离
+	set.points[i].point
+	set.points[i].normal
+	set.points[i].dist
+}
+```
+
+```
+void cpArbiterSetContactPointSet(cpArbiter *arb, cpContactPointSet *set)
+```
+
+
 ## 帮助函数 
 
 ```
@@ -851,11 +875,25 @@ typedef struct cpSegmentQueryInfo {
 	cpShape *shape;
 	// 线段查询的归一化距离，在[0,1]范围内
 	cpFloat t;
-	// 表面命中点
+	// 表面命中点的法向量
 	cpVect n;
 } cpSegmentQueryInfo;
 
 ```
+
+
+
+### 线段查询辅助函数：
+
+```
+cpVect cpSegmentQueryHitPoint(cpVect start, cpVect end, cpSegmentQueryInfo info)
+```
+返回在世界坐标系内线段与形状相交的第一个相交点。
+
+```
+cpFloat cpSegmentQueryHitDist(cpVect start, cpVect end, cpSegmentQueryInfo info)
+```
+返回线段与形状第一个相交点的绝对距离。
 
 ## AABB查询
 
