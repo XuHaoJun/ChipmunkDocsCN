@@ -13,3 +13,7 @@ ChipmunkCommunityCN
 ##Chipmunk2D中文WIKI
 
 -  中文WIKI建设中, 面包会有的
+
+##说明
+
+最近翻译工作移步到了泰然[https://github.com/iTyran](https://github.com/iTyran)，翻译校正结束后会将仓库公开，并发布PDF等便携格式。
