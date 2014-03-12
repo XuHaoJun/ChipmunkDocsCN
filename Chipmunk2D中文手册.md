@@ -36,7 +36,7 @@ C API的另一个问题是访问限制。Chipmunk有许多结构体，字段，�
 
 我们同时在出售Chipmunk2D的扩展版本： Chipmunk2D Pro。主要的特性有：ARM和NEON指令优化，多线程优化，一个为iOS/Mac开发提供的Objective-C封装层，以及自动几何工具。优化主要集中在提高移动性能，同时多线程特性能在支持pthread的平台运行。Objective-C封装层能让你无缝整合到Cocos2D或UIKit等框架，并能获得本地内存管理的优势（包括ARC）。同时Pro版本有大量优秀的API扩展。自动几何工具让你能从图像数据或程序生成并使用几何。
 
-另外，出售Chipmunk2D Pro让我们得以生存，并保持Chipmunk2D的开源。捐献也能棒，但是购买Pro版本你将获得捐献之外的某些东西。
+另外，出售Chipmunk2D Pro让我们得以生存，并保持Chipmunk2D的开源。捐献也很棒，但是购买Pro版本你将获得捐献之外的某些东西。
 
 ## 1.4 下载与编译
 
@@ -178,35 +178,38 @@ SOFTWARE.
 -  [Chipmunk论坛](http://chipmunk2d.net/forum) - Chipmunk2D官方论坛
 -  [Howling Moon Software](http://howlingmoonsoftware.com/) - 我合办的软件公司（我们提供外包工作）
 -  [Chipmunk2D Pro](http://chipmunk2d.net/chipmunkPro.php) - Chipmunk的增强版本，我们为ARM或者多核平台做了一些特定的优化，如从图像或程序数据中进行自动几何操作，以及为Objective-C做了API封装。
--  [游戏](http://chipmunk2d.net/games.php) - 使用Chimunk做的游戏清单。至少一小部分我们知道。
+-  [游戏](http://chipmunk2d.net/games.php) - 使用Chipmunk做的游戏清单。至少一小部分我们知道。
 
 # 2. Chipmunk2D 基础
 ## 2.1 概述
 
-在Chimpmunk中有4种基本对象类型，分别是
+在Chipmunk中有4种基本对象类型，分别是
 
 -  刚体：一个刚体容纳着一个对象的物理属性（如质量、位置、角度、速度等）。默认情况下，它并不具有任何形状，直到你为它添加一个或者多个碰撞形状进去。如果你以前做过物理粒子，你会发现它们的不同之处是刚体可以旋转。在游戏中，通常刚体都是和一个精灵一一对应关联的。你应该构建你的游戏以便可以使用刚体的位置和角度来绘制你的精灵。
 -  碰撞形状：因为形状与刚体相关联，所以你可以为一个刚体定义形状。为了定义一个复杂的形状，你可以给刚体绑定足够多的形状。形状包含着一个对象的表面属性如摩擦力、弹性等。
 -  约束/关节：约束和关节被用来描述刚体之间是如何关联的
 -  空间：空间是Chipmunk中模拟对象的容器。你将刚体、形状、关节添加进入一个空间，然后将空间作为一个整体进行更新。空间控制着所有的刚体、形状和约束之间的相互作用。
 
+人们经常对Chipmunk中的刚体和碰撞形状以及两者与精灵之间的关系产生混淆。精灵是对象的可视化表现，而碰撞形状是定义对象应该如何碰撞的不可见的属性。精灵和碰撞形状两者的位置和角度都是由刚体的运动控制的。通常你应该创建一个游戏对象类型，把这些东西捆绑在一起。
+
 ## 2.2 内存管理
 
 对于你将使用的大多数结构体来说，Chipmunk采用了一套或多或少的标准和简单直接的内存管理方式。拿`cpSpace`结构体来举例：
 
 -  cpSpaceNew()  - 分配并初始化一个`cpSpace`结构体。它先后调用了`cpSpaceAlloc()`和`cpSpaceInit(cpSpace *space)`
--  cpSpaceFree(cpSpace *space) - 破环并释放`cpSpace`结构体
+-  cpSpaceFree(cpSpace *space) - 销毁并释放`cpSpace`结构体
 
-你对任何你所分配过空间的结构体都负有释放的责任。 Chipmunk没有采用引用计数和垃圾回收机制。 如果你调用了一个`new`函数，则必须匹配调用`free`函数来释放空间，否则会引起内存泄漏。
+你有责任释放掉任何你分配了内存空间的结构体。 Chipmunk没有采用引用计数和垃圾回收机制。 如果你调用了一个`new`函数，则必须匹配调用`free`函数来释放空间，否则会引起内存泄漏。
 
-另外当你需要在栈上分配临时结构体，或者写一个语言绑定又或者在一个低内存容量的环境下编码，这时你需要更多分配和初始化的控制权，便可以使用下面的函数。*大部分人永远都不会使用下面几个函数。*
+另外当你在栈上分配临时结构体，或者写一个语言绑定，又或者在一个内存受限的环境下编码的时候，如果你在内存的分配和初始化上需要更多的控制权，可以使用下面的函数。*大部分人永远都不会使用这些函数。*
 
--  cpSpaceAlloc() - 为一个`cpSpace`结构体分配空间，但不进行初始化。所有的分配空间的函数看起来大致就像这样:`return (cpSpace *)cpcalloc(1, sizeof(cpSpace));`。 如果需要的话你可以自己实现自己的分配空间函数
+-  cpSpaceAlloc() - 为一个`cpSpace`结构体分配空间，但不进行初始化。所有的分配空间的函数看起来大致就像这样:`return (cpSpace *)cpcalloc(1, sizeof(cpSpace));`。 如果需要的话你可以自己实现自己的分配空间函数。把内存空间重置为0，不是硬性要求。
 -  cpSpaceInit(cpSpace *space) - 初始化`cpSpace`结构体
 -  cpSpaceDestroy(cpSpace *space) - 释放由`cpSpaceInit()`申请的所有内存空间，但并不释放`cpSpace`结构体本身
 
-就像`new`和`free`函数的对应调用一样，任何由`alloc`函数分配的内存都要由`cpfree()`或类似的函数来释放，任何由`init`函数初始化申请空间的对象都要通过`destroy`函数来释放。
+就像`new`和`free`函数的对应调用一样，任何由`alloc`函数分配的内存都要由`cpfree()`或类似的函数来释放，任何`init`函数调用都必须对应`destroy`函数调用。
 
+为了能够更加轻松地集成垃圾回收或其他内存管理机制，Chipmunk有若干可以被重写的编译时定义(cpcalloc(), cprealloc(), cpfree())。如果你不是通过带有垃圾回收的语言使用Chipmunk，我强烈推荐使用libGC。它为基于C的语言提供了一个几乎透明的垃圾收集器。
 
 ## 2.3 基本类型
 
@@ -220,11 +223,15 @@ SOFTWARE.
 -  cpGroup: 碰撞组唯一标识符，默认是unsigned int。当你不想区分组别的时候，可以定义一个`CP_NO_GROUP`。自定义类型必须支持`==`运算符
 -  cpLayers: 该类型被用作为层的掩码，默认是unsigned int。`CP_ALL_LAYERS`被用来定义为所有层位。自定义类型必须支持位操作`&`运算符
 
+如果你正在写游戏引擎或者在Chipmunk之上进行语言绑定，你可能希望使用对象的引用代替整数来表示碰撞类型和碰撞组。我经常使用类指针来表示碰撞类型，游戏对象指针来表示碰撞组。这比到处定义枚举表简单多了。
+
+注意：在iphone上，为了性能和兼容性，cpFloat被定义为float，cpVect是CGPoint的别名。
+
 ## 2.4 数学运算
 
 首先，Chipmunk默认使用双精度浮点数进行数学计算。在大多数现代台式机处理器下这样很可能更快点，并意味着你可以不用过多担心浮点舍入引起的误差。在编译库的时候你可以修改Chipmunk使用的浮点类型。请查看`chipmunk_types.h`。
 
-Chipmunk为一些常用的数学函数定义了别名以便你可以用Chimpmunk的浮点型来代表`float`或者`double`类型计算。在你的代码里，这或许不是一个很充分的理由，但在你使用了错误的`float/double`版本的数学函数而造成了2%的性能损失，请使用这些别名函数。
+Chipmunk为一些常用的数学函数定义了别名以便你可以用Chipmunk的浮点类型来代表`float`或者`double`类型。在你的代码里，或许没有充分的理由去使用这些别名，除非你预计今后你可能会改变Chipmunk的浮点类型，而且你很介意错误的使用`float/double`版本的数学函数所造成的2%的性能下降。
 
 有一些函数或许你会发现非常有用：
 
@@ -333,9 +340,9 @@ cpBB cpBBNewForCircle(const cpVect p, const cpFloat r)
 
 一般当我们创建一个刚体并将它添加到空间上后，空间就开始对之进行模拟，包括了对刚体位置、速度、受力以及重力影响等的模拟。没被添加到空间（没有被模拟）的刚体我们把它称之为*流氓刚体*。流氓刚体最重要的用途就是用来当作静态刚体，但是你仍然可以使用它们来实现直接控制物体，如移动平台。
 
-静态刚体是流氓刚体，但被设置了一个特殊的标志以便让Chipmunk知道它们从不移动除非你要求这么做。静态刚体有两个目的。最初，它们被加入用来实现休眠功能。因为静态刚体不移动，Chipmunk知道让与它们接触或者连接的物体安全的进入休眠。接触或连接常规流氓刚体的物体从不允许休眠。静态刚体的第二个目的就是让Chipmunk知道关联到它们的形状从不需要更新它们的碰撞检测数据。Chipmunk也不需要关心静态物体之间的碰撞。一般所有水平几何都会被关联到一个静态刚体上除了移动平台或门等物体。
+静态刚体是流氓刚体，但被设置了一个特殊的标志以便让Chipmunk知道它们从不移动除非你要求这么做。静态刚体有两个目的。最初，它们被加入用来实现休眠功能。因为静态刚体不移动，Chipmunk知道让那些与静态刚体接触或者连接的物体安全的进入休眠。接触或连接常规流氓刚体的物体从不允许休眠。静态刚体的第二个目的就是让Chipmunk知道，关联到静态刚体的碰撞形状是不需要更新碰撞检测数据的。Chipmunk也不需要操心静态物体之间的碰撞检测。通常所有的关卡几何图形都会被关联到一个静态刚体上除了那些能够移动的东西，例如平台或门等。
 
-在Chipmunk5.3版本之前，你要创建一个无限大质量的流氓刚体通过`cpSpaceAddStaticShape()`来添加静态形状。现在你不必这样做了，并且如果你想使用休眠功能也不应该这样做了。每一个空间都有一个专用的静态刚体，你可以使用它来添加静态形状。Chipmunk也会自动将形状作为静态形状添加到静态刚体上。
+在Chipmunk5.3版本之前，你要创建一个无限大质量的流氓刚体，通过`cpSpaceAddStaticShape()`来添加静态形状。现在你不必这样做了，并且如果你想使用休眠功能也不应该这样做了。每一个空间都有一个专用的静态刚体，你可以使用它来添加静态形状。Chipmunk也会自动将形状作为静态形状添加到静态刚体上。
 
 ## 5.2 内存管理函数
 
@@ -348,12 +355,12 @@ void cpBodyDestroy(cpBody *body)
 void cpBodyFree(cpBody *body)
 ```
 
-如上是一套标准的Chipmunk内存管理函数。`m`和`i`是刚体的质量和转动惯量。猜想刚体的质量通常是好的，但是猜想刚体的转动惯量却会导致一个很差的模拟。在任何关联到刚体的形状或者约束从空间移除之前注意不要释放刚体。
+如上是一套标准的Chipmunk内存管理函数。`m`和`i`是刚体的质量和转动惯量。猜想刚体的质量通常是可行的，但是猜想刚体的转动惯量却会导致一个很差的模拟。在任何关联到刚体的形状或者约束从空间移除之前注意不要释放刚体。
 
 
 ## 5.3 创建额外静态刚体
 
-每一个`cpSpace`都有一个可以直接使用的内置的静态刚体，构建你自己的也非常便利。一个潜在的用途就是用在关卡编辑器中。通过将关卡的物块关联到静态刚体，你仍然可以相互独立的移动和旋转物块。然后你要做的就是在结束后调用`cpSpaceRehashStatic()`来重建静态碰撞检测的数据。
+每一个`cpSpace`都有一个可以直接使用的内置静态刚体，同时你也可以便利地构建自己的静态刚体。一个潜在的用途就是用在关卡编辑器中。你可以把关卡的不同组块关联到不同的静态刚体上，这样你仍然可以独立的移动和旋转每一个组块。你要做的只是在操作完成之后调用`cpSpaceRehashStatic()`来重建静态碰撞检测的数据。
 
 关于流氓和静态刚体的更多信息，请看Chipmunk空间。
 
@@ -362,7 +369,7 @@ cpBody *cpBodyAlloc(void);
 cpBody *cpBodyInitStatic(cpBody *body)
 cpBody *cpBodyNewStatic()
 ```
-创建额外的具有无限的质量和转动惯量的静态物体。
+创建额外的具有无限的质量和转动惯量的静态刚体。
 
 ## 5.4 属性
 
@@ -489,13 +496,13 @@ cpFloat composite = cpMomentForBox(boxMass, 1, 4) + cpMomentForCircle(circleMass
 
 ## 5.7 施加力和力矩
 
-人们有时候容易混淆力和冲力之间的区别。冲力基本上是一个在非常短的时间内施加的一个非常大的力，就像一个球击中一堵墙或者大炮射击一样。Chipmunk的冲力会在一瞬间直接施加在物体的速度上。无论是力还是冲力都受到物体质量的影响。物体质量翻倍，则效果减半。
+人们有时候容易混淆力和冲量之间的区别。冲量基本上是一个在非常短的时间内施加的一个非常大的力，就像一个球击中一堵墙或者大炮射击一样。Chipmunk的冲量会在一瞬间直接施加在物体的速度上。无论是力还是冲量都受到物体质量的影响。物体质量翻倍，则效果减半。
 
 -  void cpBodyResetForces(cpBody *body) – 对刚体施加0值的力和扭矩
 -  void cpBodyApplyForce(cpBody *body, const cpVect f, const cpVect r) – 在离重心相对偏移量为r的位置施加`f`的力于`body`上
--  void cpBodyApplyImpulse(cpBody *body, const cpVect j, const cpVect r) – 在离重心相对偏移量为r的位置施加`j`的冲力于`body`上。
+-  void cpBodyApplyImpulse(cpBody *body, const cpVect j, const cpVect r) – 在离重心相对偏移量为r的位置施加`j`的冲量于`body`上。
 
-注: `cpBodyApplyForce()`和`cpBodyApplyImpulse()`两者都是在绝对坐标系中施加力或者冲力，并在绝对坐标系中产生相对的偏移。（偏移量相对于重心位置，但不随刚体旋转）
+注: `cpBodyApplyForce()`和`cpBodyApplyImpulse()`两者都是在绝对坐标系中施加力或者冲量，并在绝对坐标系中产生相对的偏移。（偏移量相对于重心位置，但不随刚体旋转）
 
 
 ## 5.8 休眠函数
@@ -510,11 +517,7 @@ Chipmunk支持休眠功能，以便其停止使用CPU时间来模拟移动的对
 ```
 void cpBodySleepWithGroup(cpBody *body, cpBody *group)
 ```
-当对象在Chipmunk中处于休眠时，和它接触或连接在一起的所有刚体都会作为一组进入休眠。当对象被唤醒时，和它一组的所有对象都会被唤醒。
-
-
-`cpBodySleepWithGroup()`允许你将群组中的对象一起休眠。如果你通过一个新的组给`groups`
-传递`NULL`值，则它和`cpBodySleep()`功能一样。如果你为`groups`传入一个休眠的刚体，那么当`group`是唤醒状态时，`body`也会被唤醒。你可以通过这来初始化关卡并开始堆对象的预休眠状态。
+当对象在Chipmunk中处于休眠时，和它接触或连接在一起的所有刚体都会作为一组进入休眠。当对象被唤醒时，和它一组的所有对象都会被唤醒。 `cpBodySleepWithGroup()`允许你将群组中的对象一起休眠。如果你通过一个新的组给`groups` 传递`NULL`值，则它和`cpBodySleep()`功能一样。如果你为`groups`传入一个休眠的刚体，那么当`group`是唤醒状态时，`body`也会被唤醒。你可以通过这来初始化关卡并将堆栈中的对象置为预休眠状态。
 
 休眠例子
 
@@ -552,19 +555,19 @@ for(int i=0; i<5; i++){
 typedef void (*cpBodyShapeIteratorFunc)(cpBody *body, cpShape *shape, void *data)
 void cpBodyEachShape(cpBody *body, cpBodyShapeIteratorFunc func, void *data)
 ```
-对于关联到`body`且被加入到空间的每个形状调用`func`函数。`data`作为上下文值传递。使用这些回调来删除形状是安全的。
+迭代与`body`相关的且附加到空间上的所有形状，每次迭代都会调用`func`函数。`data`作为上下文值传递。使用这些回调来删除形状是安全的。
 
 ```
 typedef void (*cpBodyConstraintIteratorFunc)(cpBody *body, cpConstraint *constraint, void *data)
 void cpBodyEachConstraint(cpBody *body, cpBodyConstraintIteratorFunc func, void *data)
 ```
-对于关联到`body`且被加入到空间的每个约束调用`func`函数。`data`作为上下文值传递。使用这些回调来删除约束是安全的。
+迭代与`body`相关的且附加到空间上的所有约束，每次迭代都会调用`func`函数。`data`作为上下文值传递。使用这些回调来删除约束是安全的。
 
 ```
 typedef void (*cpBodyArbiterIteratorFunc)(cpBody *body, cpArbiter *arbiter, void *data)
 void cpBodyEachArbiter(cpBody *body, cpBodyArbiterIteratorFunc func, void *data)
 ```
-这个更有趣。对于刚体参与碰撞的每个碰撞对调用`func`函数。调用`cpArbiterGet[Bodies|Shapes]()`或者`CP_ARBITER_GET_[BODIES|SHAPES]()`将会返回刚体或者形状作为第一个参数。你可以用它来检查各种碰撞信息。比如，接触地面，接触另一特定的对象，施加到对象上的碰撞力等。被碰撞处理回调或者`cpArbiterIngnore()`的传感器形状和仲裁者将不被接触图形跟踪。 
+这个更有趣。迭代与`body`相关的碰撞对，每次迭代都会调用`func`函数。调用`cpArbiterGet[Bodies|Shapes]()`或者`CP_ARBITER_GET_[BODIES|SHAPES]()`可以取到与此次碰撞相关的那两个刚体或形状。你可以用它来检查各种碰撞信息，例如，是否接触了地面，是否接触了另一特定的物体，物体受到的碰撞力有多大等。那些被碰撞回调拒绝的传感器类型的形状或是被`cpArbiterIngnore()`忽略的仲裁者是不会被接触图形跟踪记录的。 
 
 注：如果你的编译器支持闭包（如Clang），还有另外一组函数可以调用，如`cpBodyEachShape_b()`等。更多信息见`chipmunk.h`。
 
